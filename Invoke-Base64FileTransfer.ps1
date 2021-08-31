@@ -3,24 +3,27 @@ Function Invoke-Base64FileCopy {
     param(
         [Parameter(Mandatory=$true,ParameterSetName='ToBase64')]
         [string]$InputFile,
-        [Parameter(ParameterSetName='FromBase64')]
-        [string]$OutputFile,
-        [Parameter(ParameterSetName='FromBase64')]
-        [switch]$ConvertFromBase64
+        [Parameter(Mandatory=$true,ParameterSetName='FromBase64')]
+        [string]$OutputFile
     )
     
-    if (-not ($ConvertFromBase64)) {
-        $base64string = [Convert]::ToBase64String([IO.File]::ReadAllBytes($InputFile))
+    if ($InputFile.Length -gt 0) {
+        $TempFileName = "$($env:temp)\temp$(Get-Random -Minimum 100 -Maximum 999).zip"
+        Compress-Archive -Path $InputFile -DestinationPath $TempFileName
+        $base64string = [Convert]::ToBase64String([IO.File]::ReadAllBytes($TempFileName))
         Set-Clipboard -Value $base64string
         Write-Host "[+] Base64 representation of '$($InputFile)' copied to your clipboard." -ForegroundColor Green
-    } else {
+    } elseif ($OutputFile.Length -gt 0) {
         try {
             $Content = [System.Convert]::FromBase64String((Get-Clipboard -ErrorAction Stop))
         } catch {
             Write-Host "[-] Error converting base64 string from clipboard value" -ForegroundColor Red
         }
-        Set-Content -Path $OutputFile -Value $Content -Encoding Byte
-        Write-Host "[+] File '$($OutputFile)' created from clipboard value" -ForegroundColor Green
+        $OutputZip = $OutputFile.Insert($OutputFile.Length,'.zip')
+        Set-Content -Path $OutputZip -Value $Content -Encoding Byte
+        Write-Host "[+] File '$($OutputZip)' created from clipboard value" -ForegroundColor Green
+    } else {
+            Write-Host "[-] You need to specify either an input or output file" -ForegroundColor Yellow
     }
 }
 
