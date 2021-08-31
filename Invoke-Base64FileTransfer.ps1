@@ -75,20 +75,36 @@ Function Invoke-Base64FileCopyPreparation {
         [Parameter(Mandatory=$true,ParameterSetName='ToBase64')]
         [string]$InputFile,
         [Parameter(Mandatory=$true,ParameterSetName='FromBase64')]
-        [string]$OutputFile
+        [string]$OutputFile,
+        [Parameter(ParameterSetName='ToBase64')]
+        [Parameter(ParameterSetName='FromBase64')]
+        [switch]$CompressUsingZipFile
     )
     
     if ($InputFile.Length -gt 0) {
-        $base64string = [Convert]::ToBase64String([IO.File]::ReadAllBytes($InputFile))
-        Set-Clipboard -Value (ConvertTo-GZipString -String $base64string)
+        if ($CompressUsingZipFile) {
+            $TempFile = "$($env:TEMP)\Temp$(Get-Random -Minimum 100 -Maximum 999).zip"
+            Compress-Archive -Path $InputFile -DestinationPath $TempFile | Out-Null
+            $base64string = [Convert]::ToBase64String([IO.File]::ReadAllBytes($TempFile))
+            Set-Clipboard -Value $base64string
+            del $TempFile -Force | Out-Null
+        } else {
+            $base64string = [Convert]::ToBase64String([IO.File]::ReadAllBytes($InputFile))
+            Set-Clipboard -Value (ConvertTo-GZipString -String $base64string)
+        }
         Write-Host "[+] Compressed base64 representation of '$($InputFile)' copied to your clipboard." -ForegroundColor Green
 
     } elseif ($OutputFile.Length -gt 0) {
-        try {
-            Set-Content -Path $OutputFile -Value ([System.Convert]::FromBase64String((ConvertFrom-GZipString -String (Get-Clipboard) -ErrorAction Stop))) -Encoding Byte
-            Write-Host "[+] File '$($OutputFile)' created from clipboard value" -ForegroundColor Green
-        } catch {
-            Write-Host "[-] Error uncompressing, base64 decoding and writing clipboard content to '$($OutputFile)'"
+        if ($CompressUsingZipFile) {
+            $OutputZip = $OutputFile.Insert($OutputFile.Length,".zip")
+            Set-Content -Path $OutputZip -Value ([System.Convert]::FromBase64String((Get-Clipboard))) -Encoding Byte
+        } else {
+            try {
+                Set-Content -Path $OutputFile -Value ([System.Convert]::FromBase64String((ConvertFrom-GZipString -String (Get-Clipboard) -ErrorAction Stop))) -Encoding Byte
+                Write-Host "[+] File '$($OutputFile)' created from clipboard value" -ForegroundColor Green
+            } catch {
+                Write-Host "[-] Error uncompressing, base64 decoding and writing clipboard content to '$($OutputFile)'"
+            }
         }
     } else {
             Write-Host "[-] You need to specify either an input or output file" -ForegroundColor Yellow
@@ -97,5 +113,5 @@ Function Invoke-Base64FileCopyPreparation {
 
 
 
-Invoke-Base64FileCopyPreparation -InputFile "C:\tools\kerbrute_windows_amd64.exe"
-Invoke-Base64FileCopyPreparation -OutputFile "C:\tools\kerbrute_windows_amd64_newer.exe"
+#Invoke-Base64FileCopyPreparation -InputFile "C:\tools\kerbrute_windows_amd64.exe"
+#Invoke-Base64FileCopyPreparation -OutputFile "C:\tools\kerbrute_windows_amd64_newer.exe"
