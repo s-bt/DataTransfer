@@ -2,7 +2,8 @@
 
 
 ## Invoke-Base64FileTransfer.ps1
-Transfer files using their base64 encoded values. You could use this for transfering files to RDP or Citrix when file copy is disabled but clipboard sharing is allowed
+Transfer files using their base64 encoded values. You could use this for transfering files to RDP or Citrix when file copy is disabled but clipboard sharing is allowed.
+GZIP compression functions have been borrowed from https://www.dorkbrain.com/docs/2017/09/02/gzip-in-powershell/
 ### Usage:
 Convert the content of a file to base64, compress it and copy it to the clipboard
 ```powershell
@@ -14,6 +15,3 @@ Decompress and base64 decode the content of the clipboard and write it to disk
 . .\Invoke-Base64FileTransfer.ps1
 Invoke-Base64FileCopy -OutputFile C:\myFiles\File.zip -ConvertFromBase64
 ```
-
-
-
