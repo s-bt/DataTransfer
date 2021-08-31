@@ -1,17 +1,15 @@
-# File transfer via base64 conversion and clipboard copy
+# File transfer options
 
-## Create-AdminCertificate.ps1
-The script needs to be run frmo a domain member and a domain user
-It tries to enroll for certificates specifying a upn of your chosing
+## Invoke-Base64FileTransfer.ps1
+Transfer files using their base64 encoded values
 ### Usage:
-Enroll certificates using all insecure templates
+Convert the content of a file to base64 and copy it to the clipboard
 ```powershell
-. .\Create-AdminCertificate.ps1 -desiredUPN Administrator@ad.seblab.at -TryAllTemplates -InsecureTemplatesOnly
+. .\Invoke-Base64FileTransfer.ps1 -InputFile C:\myFiles\File.zip
 ```
-Enroll certificates using a specific template. We will try to enroll even if the template does not allow for a manual subject name.
-We still test as the CA might be configured with +editf_attributesubjectaltname2 and lets us add the upn anyways
+Convert the content of the clipboard (must be the base64 representation of a file) to disk
 ```powershell
-. .\Create-AdminCertificate.ps1 -desiredUPN Administrator@ad.seblab.at -TemplateName User
+. .\Invoke-Base64FileTransfer.ps1 -OutputFile C:\myFiles\File.zip -FromBase64
 ```
 
 
