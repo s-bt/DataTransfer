@@ -8,10 +8,10 @@ GZIP compression functions have been borrowed from https://www.dorkbrain.com/doc
 Convert the content of a file to base64, compress it and copy it to the clipboard
 ```powershell
 . .\Invoke-Base64FileTransfer.ps1
-Invoke-Base64FileCopy -InputFile C:\myFiles\File.zip
+Invoke-Base64FileCopyPreparation -InputFile C:\myFiles\File.zip
 ```
 Decompress and base64 decode the content of the clipboard and write it to disk
 ```powershell
 . .\Invoke-Base64FileTransfer.ps1
-Invoke-Base64FileCopy -OutputFile C:\myFiles\File.zip
+Invoke-Base64FileCopyPreparation -OutputFile C:\myFiles\File.zip
 ```
